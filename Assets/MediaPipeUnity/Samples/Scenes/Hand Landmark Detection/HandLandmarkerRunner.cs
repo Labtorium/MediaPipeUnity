@@ -5,6 +5,7 @@
 // https://opensource.org/licenses/MIT.
 
 using System.Collections;
+using Mediapipe.Tasks.Components.Containers;
 using Mediapipe.Tasks.Vision.HandLandmarker;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -153,6 +154,21 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
     private void OnHandLandmarkDetectionOutput(HandLandmarkerResult result, Image image, long timestamp)
     {
+      if (result.handLandmarks != null && result.handLandmarks.Count > 0)
+      {
+        for (int i = 0; i < result.handLandmarks.Count; i++)
+        {
+          NormalizedLandmarks landmarks = result.handLandmarks[i];
+          Debug.Log($"Hand {i}: landmarks detected");
+          if (landmarks.landmarks != null && landmarks.landmarks.Count > 0)
+          {
+            //Mediapipe.Tasks.Components.Containers.NormalizedLandmark wrist = landmarks.landmarks[0];
+            var wrist = landmarks.landmarks[0];
+            Debug.Log($"Hand {i} Wrist: x={wrist.x:F3}, y={wrist.y:F3}, z={wrist.z:F3}");
+          }
+        }
+      }
+      
       _handLandmarkerResultAnnotationController.DrawLater(result);
     }
   }
