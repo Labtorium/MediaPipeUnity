@@ -4,19 +4,23 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
-using System.Collections;
+using Mediapipe;
 using Mediapipe.Tasks.Components.Containers;
+using Mediapipe.Tasks.Vision.Core;
 using Mediapipe.Tasks.Vision.HandLandmarker;
+using Mediapipe.Unity;
+using Mediapipe.Unity.Experimental;
+using Mediapipe.Unity.Sample;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
+using RunningMode = Mediapipe.Tasks.Vision.Core.RunningMode;
 
-namespace Mediapipe.Unity.Sample.HandLandmarkDetection
+namespace MediaPipeUnity.Scenes
 {
   public class HandLandmarkerRunner : VisionTaskApiRunner<HandLandmarker>
   {
-    [SerializeField] private HandLandmarkerResultAnnotationController _handLandmarkerResultAnnotationController;
-
-    private Experimental.TextureFramePool _textureFramePool;
+    private TextureFramePool _textureFramePool;
 
     public readonly HandLandmarkDetectionConfig config = new HandLandmarkDetectionConfig();
 
@@ -39,7 +43,7 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
       yield return AssetLoader.PrepareAssetAsync(config.ModelPath);
 
-      var options = config.GetHandLandmarkerOptions(config.RunningMode == Tasks.Vision.Core.RunningMode.LIVE_STREAM ? OnHandLandmarkDetectionOutput : null);
+      var options = config.GetHandLandmarkerOptions(config.RunningMode == RunningMode.LIVE_STREAM ? OnHandLandmarkDetectionOutput : null);
       taskApi = HandLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
       var imageSource = ImageSourceProvider.ImageSource;
 
@@ -53,22 +57,17 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
       // Use RGBA32 as the input format.
       // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so maybe the following code needs to be fixed.
-      _textureFramePool = new Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
-
-      // NOTE: The screen will be resized later, keeping the aspect ratio.
-      // screen.Initialize(imageSource);
-
-      // SetupAnnotationController(_handLandmarkerResultAnnotationController, imageSource);
+      _textureFramePool = new TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
       var transformationOptions = imageSource.GetTransformationOptions();
       var flipHorizontally = transformationOptions.flipHorizontally;
       var flipVertically = transformationOptions.flipVertically;
-      var imageProcessingOptions = new Tasks.Vision.Core.ImageProcessingOptions(rotationDegrees: (int)transformationOptions.rotationAngle);
+      var imageProcessingOptions = new ImageProcessingOptions(rotationDegrees: (int)transformationOptions.rotationAngle);
 
       AsyncGPUReadbackRequest req = default;
       var waitUntilReqDone = new WaitUntil(() => req.done);
       var waitForEndOfFrame = new WaitForEndOfFrame();
-      var result = HandLandmarkerResult.Alloc(options.numHands);
+      HandLandmarkerResult.Alloc(options.numHands);
 
       // NOTE: we can share the GL context of the render thread with MediaPipe (for now, only on Android)
       var canUseGpuImage = SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 && GpuManager.GpuResources != null;
@@ -123,31 +122,9 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
             break;
         }
 
-        switch (taskApi.runningMode)
+        if (taskApi.runningMode == RunningMode.LIVE_STREAM)
         {
-          case Tasks.Vision.Core.RunningMode.IMAGE:
-            if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
-            {
-              // _handLandmarkerResultAnnotationController.DrawNow(result);
-            }
-            else
-            {
-              // _handLandmarkerResultAnnotationController.DrawNow(default);
-            }
-            break;
-          case Tasks.Vision.Core.RunningMode.VIDEO:
-            if (taskApi.TryDetectForVideo(image, GetCurrentTimestampMillisec(), imageProcessingOptions, ref result))
-            {
-              // _handLandmarkerResultAnnotationController.DrawNow(result);
-            }
-            else
-            {
-              // _handLandmarkerResultAnnotationController.DrawNow(default);
-            }
-            break;
-          case Tasks.Vision.Core.RunningMode.LIVE_STREAM:
-            taskApi.DetectAsync(image, GetCurrentTimestampMillisec(), imageProcessingOptions);
-            break;
+          taskApi.DetectAsync(image, GetCurrentTimestampMillisec(), imageProcessingOptions);
         }
       }
     }
@@ -168,8 +145,6 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
           }
         }
       }
-      
-      // _handLandmarkerResultAnnotationController.DrawLater(result);
     }
   }
 }
