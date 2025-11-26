@@ -16,7 +16,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using RunningMode = Mediapipe.Tasks.Vision.Core.RunningMode;
 
-namespace MediaPipeUnity.Scenes
+namespace DodgeMan
 {
   public class HandLandmarkerRunner : VisionTaskApiRunner<HandLandmarker>
   {
@@ -54,6 +54,9 @@ namespace MediaPipeUnity.Scenes
         Debug.LogError("Failed to start ImageSource, exiting...");
         yield break;
       }
+
+      // WebCameraの入力解像度を表示
+      Debug.Log($"WebCamera Resolution: {imageSource.textureWidth} x {imageSource.textureHeight}");
 
       // Use RGBA32 as the input format.
       // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so maybe the following code needs to be fixed.

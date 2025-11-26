@@ -9,7 +9,7 @@ using Mediapipe.Tasks.Vision.HandLandmarker;
 using Mediapipe.Unity;
 using RunningMode = Mediapipe.Tasks.Vision.Core.RunningMode;
 
-namespace MediaPipeUnity.Scenes
+namespace DodgeMan
 {
   public class HandLandmarkDetectionConfig
   {
