@@ -21,7 +21,10 @@ namespace DodgeMan
 {
   public class PoseLandmarkerRunner : VisionTaskApiRunner<PoseLandmarker>
   {
+    [SerializeField] private GameObject _character;
     private TextureFramePool _textureFramePool;
+    private float _pendingMoveX;
+    private bool _hasPendingMove;
 
     public readonly PoseLandmarkDetectionConfig config = new PoseLandmarkDetectionConfig();
 
@@ -146,10 +149,20 @@ namespace DodgeMan
         if (landmarks.landmarks != null && landmarks.landmarks.Count > 0)
         {
           NormalizedLandmark nose = landmarks.landmarks[0];
-          Debug.Log($"Nose: x={nose.x:F3}, y={nose.y:F3}, z={nose.z:F3}");
+          _pendingMoveX = 2.0f - nose.x * 4.0f;
+          _hasPendingMove = true;
         }
       }
       DisposeAllMasks(result);
+    }
+
+    private void Update()
+    {
+      if (_hasPendingMove)
+      {
+        _character.transform.position = new Vector3(_pendingMoveX, _character.transform.position.y, _character.transform.position.z);
+        _hasPendingMove = false;
+      }
     }
 
     private void DisposeAllMasks(PoseLandmarkerResult result)
