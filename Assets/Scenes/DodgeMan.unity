@@ -220,6 +220,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: e39dd657be7298d408f1a135c76c3d9a, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 47a845779355847e9842b70a0c328bec, type: 3}
+    - target: {fileID: 9500000, guid: e39dd657be7298d408f1a135c76c3d9a, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 65540a1b8eb2240369fd10223a867320, type: 2}
     m_RemovedComponents:
     - {fileID: 11400002, guid: e39dd657be7298d408f1a135c76c3d9a, type: 3}
     - {fileID: 11400084, guid: e39dd657be7298d408f1a135c76c3d9a, type: 3}
